@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>База товаров</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f9f9f9;
+            color: #333;
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+        }
+        .table-container {
+            overflow-x: auto;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            background: #fff;
+            border-radius: 8px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        thead th {
+            background-color: #34495e;
+            color: #fff;
+            padding: 12px 15px;
+            text-align: left;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        tbody td {
+            padding: 10px 15px;
+            border-bottom: 1px solid #ddd;
+        }
+        tbody tr:hover {
+            background-color: #f1f1f1;
+        }
+        .negative {
+            color: #e74c3c;
+            font-weight: bold;
+        }
+        .coeff-highlight {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+    </style>
+</head>
+<body>
+    <h1>База товаров</h1>
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Номенклатура, Ед. изм.</th>
+                    <th>Код</th>
+                    <th>Остаток</th>
+                    <th>Закуп</th>
+                    <th>Розница</th>
+                    <th>Коэфф</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>!УЦЕНКА! Лезвие 18мм сегмент. 10шт, шт</td>
+                    <td>ro-00030046</td>
+                    <td class="negative">-3,000</td>
+                    <td>7,57</td>
+                    <td>20,00</td>
+                    <td class="coeff-highlight">2,64</td>
+                </tr>
+                <tr>
+                    <td>ACE ультра гель отбеливатель 1л, шт</td>
+                    <td>ro-00000695</td>
+                    <td class="negative">-1,000</td>
+                    <td>79,10</td>
+                    <td>180,00</td>
+                    <td class="coeff-highlight">2,28</td>
+                </tr>
+                <tr>
+                    <td>AGREE'S Хвойное 0,25л удобрение, шт</td>
+                    <td>ro-00026199</td>
+                    <td class="negative">-1,000</td>
+                    <td>46,17</td>
+                    <td>85,00</td>
+                    <td class="coeff-highlight">1,84</td>
+                </tr>
+                <tr>
+                    <td>ARGANIQ д/комнатн.цветов 200г, шт</td>
+                    <td>ro-00018125</td>
+                    <td>13,000</td>
+                    <td>66,60</td>
+                    <td>135,00</td>
+                    <td class="coeff-highlight">2,03</td>
+                </tr>
+                <tr>
+                    <td>ARGANIQ д/комнатн.цветов 500г, шт</td>
+                    <td>ro-00017939</td>
+                    <td>2,000</td>
+                    <td>110,70</td>
+                    <td>220,00</td>
+                    <td class="coeff-highlight">1,99</td>
+                </tr>
+                <tr>
+                    <td>ARGANIQ д/овощных и ягод. культ. 350г, шт</td>
+                    <td>ro-00017912</td>
+                    <td class="negative">-1,000</td>
+                    <td>91,80</td>
+                    <td>184,00</td>
+                    <td class="coeff-highlight">2,00</td>
+                </tr>
+                <tr>
+                    <td>Argus garden спрей от клещей, муравьев, тли 250мл, шт</td>
+                    <td>ro-00023624</td>
+                    <td>2,000</td>
+                    <td>109,03</td>
+                    <td>202,00</td>
+                    <td class="coeff-highlight">1,85</td>
+                </tr>
+                <tr>
+                    <td>ARGUS спрей от клещей 125мл, шт</td>
+                    <td>ro-00023813</td>
+                    <td>1,000</td>
+                    <td>55,06</td>
+                    <td>102,00</td>
+                    <td class="coeff-highlight">1,85</td>
+                </tr>
+                <tr>
+                    <td>AVA Агровитамины д/декор-листв. 13,5г., шт</td>
+                    <td>ro-00018115</td>
+                    <td>19,000</td>
+                    <td>64,80</td>
+                    <td>130,00</td>
+                    <td class="coeff-highlight">2,01</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>
