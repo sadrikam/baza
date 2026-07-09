@@ -3,144 +3,304 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>База товаров</title>
+    <title>Просмотр базы товаров (CSV с ;)</title>
     <style>
+        :root {
+            --primary: #3498db;
+            --danger: #e74c3c;
+            --bg: #f4f6f9;
+            --text: #333;
+            --header: #34495e;
+        }
+
         body {
-            font-family: Arial, sans-serif;
-            margin: 20px;
-            background-color: #f9f9f9;
-            color: #333;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            margin: 0;
+            padding: 20px;
         }
-        h1 {
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        header {
             text-align: center;
-            color: #2c3e50;
+            margin-bottom: 24px;
         }
-        .table-container {
-            overflow-x: auto;
-            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        h1 { margin: 0 0 8px; color: #2c3e50; }
+        p.subtitle { color: #7f8c8d; margin: 0; }
+
+        .controls {
+            background: #fff;
+            padding: 16px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: flex-end;
+            justify-content: space-between;
+        }
+
+        .input-group { display: flex; flex-direction: column; min-width: 220px; }
+        .input-group label { font-size: 13px; font-weight: 600; color: #555; margin-bottom: 4px; }
+        input[type="file"], input[type="text"] {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        button.upload-btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+        button.upload-btn:hover { background-color: #2980b9; }
+
+        .table-wrapper {
             background: #fff;
             border-radius: 8px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+            overflow-x: auto;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
+            min-width: 900px; /* горизонтальная прокрутка на мобильных */
         }
-        thead th {
-            background-color: #34495e;
+
+        thead tr {
+            background-color: var(--header);
             color: #fff;
-            padding: 12px 15px;
+        }
+
+        th, td {
+            padding: 12px 16px;
             text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        th {
             position: sticky;
             top: 0;
             z-index: 10;
         }
-        tbody td {
-            padding: 10px 15px;
-            border-bottom: 1px solid #ddd;
-        }
-        tbody tr:hover {
-            background-color: #f1f1f1;
-        }
-        .negative {
-            color: #e74c3c;
+
+        tbody tr:hover { background-color: #f8f9fa; }
+
+        /* Стили ячеек */
+        .negative-stock {
+            color: var(--danger);
             font-weight: bold;
         }
-        .coeff-highlight {
-            font-weight: bold;
+        .badge-discount {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 3px 7px;
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 700;
+            margin-right: 8px;
+            vertical-align: middle;
+        }
+        .coeff-cell {
+            font-weight: 700;
             color: #2c3e50;
         }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
-    <h1>База товаров</h1>
-    <div class="table-container">
-        <table>
-            <thead>
-                <tr>
-                    <th>Номенклатура, Ед. изм.</th>
-                    <th>Код</th>
-                    <th>Остаток</th>
-                    <th>Закуп</th>
-                    <th>Розница</th>
-                    <th>Коэфф</th>
-                </tr>
+
+<div class="container">
+    <header>
+        <h1>База товаров</h1>
+        <p class="subtitle">Загрузка CSV с разделителем «;» (точка с запятой)</p>
+    </header>
+
+    <div class="controls">
+        <div class="input-group">
+            <label for="csvFileInput">1. Загрузите CSV файл:</label>
+            <input type="file" id="csvFileInput" accept=".csv">
+        </div>
+        <div class="input-group">
+            <label for="searchInput">2. Поиск по номенклатуре/коду:</label>
+            <input type="text" id="searchInput" placeholder="Введите текст...">
+        </div>
+        <button class="upload-btn" onclick="document.getElementById('csvFileInput').click()">Выбрать файл</button>
+    </div>
+
+    <div class="table-wrapper">
+        <table id="dataTable">
+            <thead id="tableHeader">
+                <!-- Заголовки будут сгенерированы JS -->
             </thead>
-            <tbody>
-                <tr>
-                    <td>!УЦЕНКА! Лезвие 18мм сегмент. 10шт, шт</td>
-                    <td>ro-00030046</td>
-                    <td class="negative">-3,000</td>
-                    <td>7,57</td>
-                    <td>20,00</td>
-                    <td class="coeff-highlight">2,64</td>
-                </tr>
-                <tr>
-                    <td>ACE ультра гель отбеливатель 1л, шт</td>
-                    <td>ro-00000695</td>
-                    <td class="negative">-1,000</td>
-                    <td>79,10</td>
-                    <td>180,00</td>
-                    <td class="coeff-highlight">2,28</td>
-                </tr>
-                <tr>
-                    <td>AGREE'S Хвойное 0,25л удобрение, шт</td>
-                    <td>ro-00026199</td>
-                    <td class="negative">-1,000</td>
-                    <td>46,17</td>
-                    <td>85,00</td>
-                    <td class="coeff-highlight">1,84</td>
-                </tr>
-                <tr>
-                    <td>ARGANIQ д/комнатн.цветов 200г, шт</td>
-                    <td>ro-00018125</td>
-                    <td>13,000</td>
-                    <td>66,60</td>
-                    <td>135,00</td>
-                    <td class="coeff-highlight">2,03</td>
-                </tr>
-                <tr>
-                    <td>ARGANIQ д/комнатн.цветов 500г, шт</td>
-                    <td>ro-00017939</td>
-                    <td>2,000</td>
-                    <td>110,70</td>
-                    <td>220,00</td>
-                    <td class="coeff-highlight">1,99</td>
-                </tr>
-                <tr>
-                    <td>ARGANIQ д/овощных и ягод. культ. 350г, шт</td>
-                    <td>ro-00017912</td>
-                    <td class="negative">-1,000</td>
-                    <td>91,80</td>
-                    <td>184,00</td>
-                    <td class="coeff-highlight">2,00</td>
-                </tr>
-                <tr>
-                    <td>Argus garden спрей от клещей, муравьев, тли 250мл, шт</td>
-                    <td>ro-00023624</td>
-                    <td>2,000</td>
-                    <td>109,03</td>
-                    <td>202,00</td>
-                    <td class="coeff-highlight">1,85</td>
-                </tr>
-                <tr>
-                    <td>ARGUS спрей от клещей 125мл, шт</td>
-                    <td>ro-00023813</td>
-                    <td>1,000</td>
-                    <td>55,06</td>
-                    <td>102,00</td>
-                    <td class="coeff-highlight">1,85</td>
-                </tr>
-                <tr>
-                    <td>AVA Агровитамины д/декор-листв. 13,5г., шт</td>
-                    <td>ro-00018115</td>
-                    <td>19,000</td>
-                    <td>64,80</td>
-                    <td>130,00</td>
-                    <td class="coeff-highlight">2,01</td>
-                </tr>
+            <tbody id="tableBody">
+                <!-- Данные будут сгенерированы JS -->
             </tbody>
         </table>
+        <div id="emptyState" class="p-4 text-center hidden" style="padding:40px; color:#7f8c8d;">
+            Загрузите CSV файл, чтобы увидеть данные здесь.
+        </div>
     </div>
+</div>
+
+<script>
+    const fileInput = document.getElementById('csvFileInput');
+    const searchInput = document.getElementById('searchInput');
+    const tableBody = document.getElementById('tableBody');
+    const tableHeader = document.getElementById('tableHeader');
+    const emptyState = document.getElementById('emptyState');
+
+    // Парсинг CSV с разделителем ";" и поддержкой кавычек
+    function parseCSV(text) {
+        const lines = text.split(/\r\n|\n/);
+        const result = [];
+        if (lines.length === 0) return { headers: [], data: [] };
+
+        // Парсим заголовки
+        const headers = parseLine(lines[0], ';');
+
+        for (let i = 1; i < lines.length; i++) {
+            const line = lines[i].trim();
+            if (!line) continue;
+
+            const values = parseLine(line, ';');
+            const obj = {};
+            headers.forEach((h, idx) => {
+                obj[h] = values[idx] !== undefined ? values[idx].trim() : '';
+            });
+            result.push(obj);
+        }
+        return { headers, data: result };
+    }
+
+    // Умный сплит строки CSV (учитывает кавычки)
+    function parseLine(line, delimiter) {
+        const result = [];
+        let current = '';
+        let inQuotes = false;
+
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            const next = line[i + 1];
+
+            if (char === '"' && !inQuotes) {
+                inQuotes = true;
+                continue;
+            } else if (char === '"' && inQuotes && next === '"') {
+                current += '"';
+                i++; // пропускаем следующую кавычку
+                continue;
+            } else if (char === '"' && inQuotes && next !== '"') {
+                inQuotes = false;
+                continue;
+            }
+
+            if (char === delimiter && !inQuotes) {
+                result.push(current);
+                current = '';
+                continue;
+            }
+
+            current += char;
+        }
+        result.push(current);
+        return result;
+    }
+
+    function renderTable(data, headers) {
+        if (!data || data.length === 0) {
+            emptyState.classList.remove('hidden');
+            tableBody.innerHTML = '';
+            tableHeader.innerHTML = '';
+            return;
+        }
+
+        emptyState.classList.add('hidden');
+
+        // Рендер заголовков
+        tableHeader.innerHTML = '<tr>' + headers.map(h => `<th>${escapeHtml(h)}</th>`).join('') + '</tr>';
+
+        // Рендер строк
+        tableBody.innerHTML = data.map(row => {
+            const nomen = row['Номенклатура, Ед. изм.'] || '';
+            const stockRaw = row['Остаток'] || '';
+            const coeffRaw = row['Коэфф'] || '';
+
+            // Преобразуем строку в число (замена , на .)
+            const stock = parseFloat(stockRaw.replace(',', '.'));
+            const coeff = parseFloat(coeffRaw.replace(',', '.'));
+
+            const isDiscount = nomen.includes('!УЦЕНКА!');
+            const stockClass = stock < 0 ? 'negative-stock' : '';
+            const stockValue = Number.isFinite(stock) ? stock.toFixed(3) : stockRaw;
+            const coeffValue = Number.isFinite(coeff) ? coeff.toFixed(2) : coeffRaw;
+
+            const nomenDisplay = isDiscount
+                ? `<span class="badge-discount">УЦЕНКА</span> ${escapeHtml(nomen.replace('!УЦЕНКА!', '').trim())}`
+                : escapeHtml(nomen);
+
+            return `
+                <tr>
+                    <td>${nomenDisplay}</td>
+                    <td>${escapeHtml(row['Код'] || '')}</td>
+                    <td class="${stockClass}">${stockValue}</td>
+                    <td>${(row['Закуп'] || '').replace(',', '.')}</td>
+                    <td>${(row['Розница'] || '').replace(',', '.')}</td>
+                    <td class="coeff-cell">${coeffValue}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+
+    function filterTable(query) {
+        const rows = tableBody.querySelectorAll('tr');
+        const lowerQuery = query.toLowerCase();
+
+        rows.forEach(row => {
+            const text = row.innerText.toLowerCase();
+            row.style.display = text.includes(lowerQuery) ? '' : 'none';
+        });
+    }
+
+    function escapeHtml(str) {
+        if (!str) return '';
+        return str
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#039;');
+    }
+
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const text = e.target.result;
+            const parsed = parseCSV(text);
+            renderTable(parsed.data, parsed.headers);
+        };
+        reader.readAsText(file, 'UTF-8');
+    });
+
+    searchInput.addEventListener('input', (e) => {
+        filterTable(e.target.value);
+    });
+</script>
+
 </body>
 </html>
