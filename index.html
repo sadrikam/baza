@@ -3,303 +3,217 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Просмотр базы товаров (CSV с ;)</title>
+    <title>Мониторинг Склада - Baza JSON</title>
     <style>
-        :root {
-            --primary: #3498db;
-            --danger: #e74c3c;
-            --bg: #f4f6f9;
-            --text: #333;
-            --header: #34495e;
-        }
-
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
-            color: var(--text);
-            margin: 0;
-            padding: 20px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f4f6f9;
+            color: #333;
         }
-
         .container {
-            max-width: 1200px;
+            max-width: 1300px;
             margin: 0 auto;
-        }
-
-        header {
-            text-align: center;
-            margin-bottom: 24px;
-        }
-        h1 { margin: 0 0 8px; color: #2c3e50; }
-        p.subtitle { color: #7f8c8d; margin: 0; }
-
-        .controls {
-            background: #fff;
-            padding: 16px;
+            background: #ffffff;
+            padding: 25px;
             border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        h1 {
+            margin-top: 0;
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 15px;
+        }
+        .search-container {
+            margin: 20px 0;
             display: flex;
-            flex-wrap: wrap;
-            gap: 12px;
-            align-items: flex-end;
-            justify-content: space-between;
+            gap: 15px;
         }
-
-        .input-group { display: flex; flex-direction: column; min-width: 220px; }
-        .input-group label { font-size: 13px; font-weight: 600; color: #555; margin-bottom: 4px; }
-        input[type="file"], input[type="text"] {
-            padding: 10px;
-            border: 1px solid #ddd;
+        .search-input {
+            flex: 1;
+            padding: 12px 15px;
+            border: 1px solid #ccd1d9;
             border-radius: 6px;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .search-input:focus {
+            border-color: #3498db;
+        }
+        .stats {
             font-size: 14px;
+            color: #7f8c8d;
+            margin-bottom: 10px;
         }
-
-        button.upload-btn {
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-        button.upload-btn:hover { background-color: #2980b9; }
-
-        .table-wrapper {
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
-            overflow-x: auto;
-        }
-
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 900px; /* горизонтальная прокрутка на мобильных */
+            margin-top: 10px;
+            font-size: 14px;
         }
-
-        thead tr {
-            background-color: var(--header);
-            color: #fff;
-        }
-
-        th, td {
-            padding: 12px 16px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
-        }
-
         th {
+            background-color: #34495e;
+            color: #ffffff;
+            text-align: left;
+            padding: 12px;
+            font-weight: 600;
             position: sticky;
             top: 0;
-            z-index: 10;
         }
-
-        tbody tr:hover { background-color: #f8f9fa; }
-
-        /* Стили ячеек */
-        .negative-stock {
-            color: var(--danger);
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+        tr:hover {
+            background-color: #f8fafc;
+        }
+        .negative-row {
+            background-color: #fff5f5;
+        }
+        .badge-negative {
+            color: #e53e3e;
+            background-color: #fed7d7;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            display: inline-block;
+        }
+        .loader {
+            text-align: center;
+            padding: 4px;
+            font-size: 18px;
+            color: #3498db;
             font-weight: bold;
         }
-        .badge-discount {
-            background-color: #fff3cd;
-            color: #856404;
-            padding: 3px 7px;
-            border-radius: 4px;
-            font-size: 0.85em;
-            font-weight: 700;
-            margin-right: 8px;
-            vertical-align: middle;
+        .error-msg {
+            color: #e53e3e;
+            background: #fed7d7;
+            padding: 15px;
+            border-radius: 6px;
+            margin: 20px 0;
         }
-        .coeff-cell {
-            font-weight: 700;
-            color: #2c3e50;
-        }
-        .hidden { display: none; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <header>
-        <h1>База товаров</h1>
-        <p class="subtitle">Загрузка CSV с разделителем «;» (точка с запятой)</p>
-    </header>
-
-    <div class="controls">
-        <div class="input-group">
-            <label for="csvFileInput">1. Загрузите CSV файл:</label>
-            <input type="file" id="csvFileInput" accept=".csv">
-        </div>
-        <div class="input-group">
-            <label for="searchInput">2. Поиск по номенклатуре/коду:</label>
-            <input type="text" id="searchInput" placeholder="Введите текст...">
-        </div>
-        <button class="upload-btn" onclick="document.getElementById('csvFileInput').click()">Выбрать файл</button>
+    <h1>Панель складского учета</h1>
+    
+    <div class="search-container">
+        <input type="text" id="nameSearch" class="search-input" placeholder="Поиск по наименованию номенклатуры...">
+        <input type="text" id="codeSearch" class="search-input" placeholder="Поиск по коду товара...">
     </div>
 
-    <div class="table-wrapper">
-        <table id="dataTable">
-            <thead id="tableHeader">
-                <!-- Заголовки будут сгенерированы JS -->
-            </thead>
-            <tbody id="tableBody">
-                <!-- Данные будут сгенерированы JS -->
-            </tbody>
-        </table>
-        <div id="emptyState" class="p-4 text-center hidden" style="padding:40px; color:#7f8c8d;">
-            Загрузите CSV файл, чтобы увидеть данные здесь.
-        </div>
-    </div>
+    <div class="stats" id="tableStats">Загрузка данных...</div>
+    <div id="loader" class="loader">Синхронизация с базой данных GitHub...</div>
+    <div id="errorContainer"></div>
+
+    <table id="dataTable" style="display: none;">
+        <thead>
+            <tr>
+                <th>Код</th>
+                <th>Наименование, Ед. изм.</th>
+                <th>Остаток</th>
+                <th>Закуп (руб)</th>
+                <th>Розница (руб)</th>
+                <th>Коэфф.</th>
+            </tr>
+        </thead>
+        <tbody id="tableBody">
+            <!-- Строки генерируются динамически -->
+        </tbody>
+    </table>
 </div>
 
 <script>
-    const fileInput = document.getElementById('csvFileInput');
-    const searchInput = document.getElementById('searchInput');
-    const tableBody = document.getElementById('tableBody');
-    const tableHeader = document.getElementById('tableHeader');
-    const emptyState = document.getElementById('emptyState');
+    // URL raw-файла из репозитория для обхода ограничений CORS GitHub Pages
+    const jsonUrl = 'https://githubusercontent.com';
+    
+    let productsData = [];
 
-    // Парсинг CSV с разделителем ";" и поддержкой кавычек
-    function parseCSV(text) {
-        const lines = text.split(/\r\n|\n/);
-        const result = [];
-        if (lines.length === 0) return { headers: [], data: [] };
-
-        // Парсим заголовки
-        const headers = parseLine(lines[0], ';');
-
-        for (let i = 1; i < lines.length; i++) {
-            const line = lines[i].trim();
-            if (!line) continue;
-
-            const values = parseLine(line, ';');
-            const obj = {};
-            headers.forEach((h, idx) => {
-                obj[h] = values[idx] !== undefined ? values[idx].trim() : '';
-            });
-            result.push(obj);
-        }
-        return { headers, data: result };
-    }
-
-    // Умный сплит строки CSV (учитывает кавычки)
-    function parseLine(line, delimiter) {
-        const result = [];
-        let current = '';
-        let inQuotes = false;
-
-        for (let i = 0; i < line.length; i++) {
-            const char = line[i];
-            const next = line[i + 1];
-
-            if (char === '"' && !inQuotes) {
-                inQuotes = true;
-                continue;
-            } else if (char === '"' && inQuotes && next === '"') {
-                current += '"';
-                i++; // пропускаем следующую кавычку
-                continue;
-            } else if (char === '"' && inQuotes && next !== '"') {
-                inQuotes = false;
-                continue;
-            }
-
-            if (char === delimiter && !inQuotes) {
-                result.push(current);
-                current = '';
-                continue;
-            }
-
-            current += char;
-        }
-        result.push(current);
-        return result;
-    }
-
-    function renderTable(data, headers) {
-        if (!data || data.length === 0) {
-            emptyState.classList.remove('hidden');
-            tableBody.innerHTML = '';
-            tableHeader.innerHTML = '';
-            return;
-        }
-
-        emptyState.classList.add('hidden');
-
-        // Рендер заголовков
-        tableHeader.innerHTML = '<tr>' + headers.map(h => `<th>${escapeHtml(h)}</th>`).join('') + '</tr>';
-
-        // Рендер строк
-        tableBody.innerHTML = data.map(row => {
-            const nomen = row['Номенклатура, Ед. изм.'] || '';
-            const stockRaw = row['Остаток'] || '';
-            const coeffRaw = row['Коэфф'] || '';
-
-            // Преобразуем строку в число (замена , на .)
-            const stock = parseFloat(stockRaw.replace(',', '.'));
-            const coeff = parseFloat(coeffRaw.replace(',', '.'));
-
-            const isDiscount = nomen.includes('!УЦЕНКА!');
-            const stockClass = stock < 0 ? 'negative-stock' : '';
-            const stockValue = Number.isFinite(stock) ? stock.toFixed(3) : stockRaw;
-            const coeffValue = Number.isFinite(coeff) ? coeff.toFixed(2) : coeffRaw;
-
-            const nomenDisplay = isDiscount
-                ? `<span class="badge-discount">УЦЕНКА</span> ${escapeHtml(nomen.replace('!УЦЕНКА!', '').trim())}`
-                : escapeHtml(nomen);
-
-            return `
-                <tr>
-                    <td>${nomenDisplay}</td>
-                    <td>${escapeHtml(row['Код'] || '')}</td>
-                    <td class="${stockClass}">${stockValue}</td>
-                    <td>${(row['Закуп'] || '').replace(',', '.')}</td>
-                    <td>${(row['Розница'] || '').replace(',', '.')}</td>
-                    <td class="coeff-cell">${coeffValue}</td>
-                </tr>
+    async function loadData() {
+        try {
+            const response = await fetch(jsonUrl);
+            if (!response.ok) throw new Error(`Ошибка сети: ${response.status}`);
+            
+            productsData = await response.json();
+            
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('dataTable').style.display = 'table';
+            
+            renderTable(productsData);
+        } catch (error) {
+            document.getElementById('loader').style.display = 'none';
+            document.getElementById('errorContainer').innerHTML = `
+                <div class="error-msg">
+                    <strong>Не удалось загрузить данные.</strong><br>
+                    Причина: ${error.message}<br>
+                    Обычно это связано с блокировкой CORS. Попробуйте запустить файл через локальный сервер или использовать современный браузер.
+                </div>
             `;
-        }).join('');
+        }
     }
 
-    function filterTable(query) {
-        const rows = tableBody.querySelectorAll('tr');
-        const lowerQuery = query.toLowerCase();
+    function renderTable(data) {
+        const tbody = document.getElementById('tableBody');
+        tbody.innerHTML = '';
 
-        rows.forEach(row => {
-            const text = row.innerText.toLowerCase();
-            row.style.display = text.includes(lowerQuery) ? '' : 'none';
+        data.forEach(item => {
+            const row = document.createElement('tr');
+            
+            // Извлекаем и чистим значение остатка
+            const rawStock = item["Остаток"] ? item["Остаток"].toString().trim() : "0";
+            const stockValue = parseFloat(rawStock.replace(',', '.'));
+            
+            const isNegative = stockValue < 0;
+            if (isNegative) {
+                row.classList.add('negative-row');
+            }
+
+            // Формируем ячейку остатка с подсветкой
+            const stockTd = isNegative 
+                ? `<td><span class="badge-negative">${rawStock}</span></td>`
+                : `<td>${rawStock}</td>`;
+
+            row.innerHTML = `
+                <td>${item["Код"] || ''}</td>
+                <td><strong>${item["Номенклатура, Ед. изм."] || ''}</strong></td>
+                ${stockTd}
+                <td>${item["Закуп"] || '0.00'}</td>
+                <td>${item["Розница"] || '0.00'}</td>
+                <td>${item["Коэфф"] || ''}</td>
+            `;
+            tbody.appendChild(row);
         });
+
+        document.getElementById('tableStats').textContent = `Показано позиций: ${data.length} из ${productsData.length}`;
     }
 
-    function escapeHtml(str) {
-        if (!str) return '';
-        return str
-            .replace(/&/g, '&amp;')
-            .replace(/</g, '&lt;')
-            .replace(/>/g, '&gt;')
-            .replace(/"/g, '&quot;')
-            .replace(/'/g, '&#039;');
+    function filterData() {
+        const nameQuery = document.getElementById('nameSearch').value.toLowerCase().trim();
+        const codeQuery = document.getElementById('codeSearch').value.toLowerCase().trim();
+
+        const filtered = productsData.filter(item => {
+            const name = (item["Номенклатура, Ед. изм."] || '').toLowerCase();
+            const code = (item["Код"] || '').toString().toLowerCase();
+
+            const matchesName = name.includes(nameQuery);
+            const matchesCode = code.includes(codeQuery);
+
+            return matchesName && matchesCode;
+        });
+
+        renderTable(filtered);
     }
 
-    fileInput.addEventListener('change', (e) => {
-        const file = e.target.files[0];
-        if (!file) return;
+    // Слушатели событий ввода для мгновенной фильтрации (debounce не требуется для текущего объема)
+    document.getElementById('nameSearch').addEventListener('input', filterData);
+    document.getElementById('codeSearch').addEventListener('input', filterData);
 
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const text = e.target.result;
-            const parsed = parseCSV(text);
-            renderTable(parsed.data, parsed.headers);
-        };
-        reader.readAsText(file, 'UTF-8');
-    });
-
-    searchInput.addEventListener('input', (e) => {
-        filterTable(e.target.value);
-    });
+    // Запуск инициализации при загрузке страницы
+    window.addEventListener('DOMContentLoaded', loadData);
 </script>
 
 </body>
