@@ -245,7 +245,7 @@
         const filtered = productsData.filter(item => {
             const name = (item["Номенклатура, Ед. изм."] || '').toLowerCase();
             const code = (item["Код"] || '').toString().toLowerCase();
-            const rawStock = item["Конечный остаток"] !== undefined ? item["Конечный остаток"] : '';
+            const rawStock = item["Остаток"] !== undefined ? item["Остаток"] : '';
             const stockValue = parseFloat(String(rawStock).replace(/\s+/g, '').replace(',', '.'));
         
             const matchesName = name.includes(nameQuery);
@@ -265,7 +265,7 @@
     // Слушатели событий ввода для мгновенной фильтрации (debounce не требуется для текущего объема)
     document.getElementById('nameSearch').addEventListener('input', filterData);
     document.getElementById('codeSearch').addEventListener('input', filterData);
-    document.getElementById('negativeFilter').addEventListener('change', filterTable);
+    document.getElementById('negativeFilter').addEventListener('change', filterData);
 
     // Запуск инициализации при загрузке страницы
     window.addEventListener('DOMContentLoaded', loadData);
