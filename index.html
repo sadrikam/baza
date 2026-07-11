@@ -228,19 +228,30 @@
         data.forEach(item => {
             const row = document.createElement('tr');
             
-            // Извлекаем и чистим значение остатка
-            const rawStock = item["Остаток"] ? item["Остаток"].toString().trim() : "0";
-            const stockValue = parseFloat(rawStock.replace(',', '.'));
-            
-            const isNegative = stockValue < 0;
-            if (isNegative) {
-                row.classList.add('negative-row');
-            }
-
-            // Формируем ячейку остатка с подсветкой
-            const stockTd = isNegative 
-                ? `<td><span class="badge-negative">${rawStock}</span></td>`
-                : `<td>${rawStock}</td>`;
+        // Формируем ячейку остатка с подсветкой и правильным форматом числа
+        const rawStock = item["Остаток"] ? item["Остаток"].toString().trim() : "0";
+        const stockValue = parseFloat(rawStock.replace(',', '.'));
+        
+        const isNegative = !isNaN(stockValue) && stockValue < 0;
+        if (isNegative) {
+            row.classList.add('negative-row');
+        }
+        
+        // --- НОВОЕ ФОРМАТИРОВАНИЕ ЧИСЛА ---
+        let displayStock;
+        
+        if (!isNaN(stockValue)) {
+            // Если число целое — выводим как целое, иначе оставляем с дробной частью
+            displayStock = Number.isInteger(stockValue) ? stockValue.toString() : stockValue.toFixed(2);
+        } else {
+            // Если не удалось распарсить — оставляем исходное значение
+            displayStock = rawStock;
+        }
+        // ---------------------------------
+        
+        const stockTd = isNegative 
+            ? `<td><span class="badge-negative">${displayStock}</span></td>`
+            : `<td>${displayStock}</td>`;
 
             row.innerHTML = `
                 <td>${item["Код"] || ''}</td>
