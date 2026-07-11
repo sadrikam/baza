@@ -231,33 +231,37 @@
             `;
             tbody.appendChild(row);
         });
+        if (data.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" style="text-align:center; padding:20px;">Ничего не найдено</td></tr>';
+          document.getElementById('tableStats').textContent = 'Показано позиций: 0';
+          return;
+        }
 
         document.getElementById('tableStats').textContent = `Показано позиций: ${data.length} из ${productsData.length}`;
     }
 
-    function filterData() {
-        const nameQuery = document.getElementById('nameSearch').value.toLowerCase().trim();
-        const codeQuery = document.getElementById('codeSearch').value.toLowerCase().trim();
+function filterData() {
+  const nameQuery = document.getElementById('nameSearch').value.toLowerCase().trim();
+  const codeQuery = document.getElementById('codeSearch').value.toLowerCase().trim();
+  const showOnlyNegative = document.getElementById('negativeFilter').checked;
 
-        const filtered = productsData.filter(item => {
-            const name = (item["Номенклатура, Ед. изм."] || '').toLowerCase();
-            const code = (item["Код"] || '').toString().toLowerCase();
-            const rawStock = item["Остаток"] !== undefined ? item["Остаток"] : '';
-            const stockValue = parseFloat(String(rawStock).replace(/\s+/g, '').replace(',', '.'));
-        
-            const matchesName = name.includes(nameQuery);
-            const matchesCode = code.includes(codeQuery);
+  const filtered = productsData.filter(item => {
+    const name = (item["Номенклатура, Ед. изм."] || '').toLowerCase();
+    const code = (item["Код"] || '').toString().toLowerCase();
 
-            // Новая строка: условие проверки отрицательного остатка
-            // Если чекбокс нажат, то stockValue должно быть меньше 0. Если не нажат — условие всегда true.
-            // const matchesNegative = !showOnlyNegative || (!isNaN(stockValue) && stockValue < 0);
-    
-            // Обновленная строка возврата результатов фильтра
-            return matchesName && matchesCode && matchesNegative;
-        });
+    const rawStock = item["Остаток"] !== undefined ? item["Остаток"] : '';
+    const stockValue = parseFloat(String(rawStock).replace(/\s+/g, '').replace(',', '.'));
 
-        renderTable(filtered);
-    }
+    const matchesName = name.includes(nameQuery);
+    const matchesCode = code.includes(codeQuery);
+    const matchesNegative = !showOnlyNegative || (!isNaN(stockValue) && stockValue < 0);
+
+    return matchesName && matchesCode && matchesNegative;
+  });
+
+  renderTable(filtered);
+}
+
 
     // Слушатели событий ввода для мгновенной фильтрации (debounce не требуется для текущего объема)
     document.getElementById('nameSearch').addEventListener('input', filterData);
