@@ -2,22 +2,19 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Мониторинг Склада - Baza JSON</title>
     <style>
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 20px;
+            margin: 8px;
             background-color: #f4f6f9;
             color: #333;
+            -webkit-tap-highlight-color: transparent;
         }
         .container {
-            max-width: 1300px;
-            margin: 0 auto;
-            background: #ffffff;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            padding: 12px; /* Было 25px */
+            border-radius: 4px; /* Было 8px */
         }
         h1 {
             margin-top: 0;
@@ -26,18 +23,14 @@
             padding-bottom: 15px;
         }
         .search-container {
-            margin: 20px 0;
-            display: flex;
-            gap: 15px;
+            margin: 12px 0; /* Было 20px 0 */
+            flex-direction: column; /* Было flex без направления (в строку) */
+            gap: 8px; /* Было 15px */
         }
+
         .search-input {
-            flex: 1;
-            padding: 12px 15px;
-            border: 1px solid #ccd1d9;
-            border-radius: 6px;
-            font-size: 15px;
-            outline: none;
-            transition: border-color 0.2s;
+        padding: 10px 12px; /* Было 12px 15px */
+        font-size: 16px; /* Было 15px */
         }
         .search-input:focus {
             border-color: #3498db;
@@ -53,6 +46,17 @@
             margin-top: 10px;
             font-size: 14px;
         }
+        .table-responsive {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+            margin-top: 10px;
+        }
+        th, td {
+            padding: 8px 6px; /* Было 12px */
+            font-size: 13px; /* Было 14px */
+            word-break: break-word; /* Новая строка */
+        }
         th {
             background-color: #34495e;
             color: #ffffff;
@@ -60,10 +64,11 @@
             padding: 12px;
             font-weight: 600;
             position: sticky;
-            top: 0;
+            top: -1px; /* Было 0 */
+            z-index: 10; /* Новая строка */
         }
         td {
-            padding: 12px;
+            /* padding: 12px; */
             border-bottom: 1px solid #e2e8f0;
         }
         tr:hover {
@@ -94,6 +99,23 @@
             border-radius: 6px;
             margin: 20px 0;
         }
+        @media (max-width: 480px) {
+        /* Скрываем колонку Коэффициент */
+        table th:nth-child(6),
+        table td:nth-child(6) {
+            display: none;
+        }
+        /* Ужимаем Код, Закуп и Розницу до минимума */
+        table th:nth-child(1), table td:nth-child(1),
+        table th:nth-child(4), table td:td:nth-child(4),
+        table th:nth-child(5), table td:nth-child(5) {
+            white-space: nowrap;
+            width: 1%;
+        }
+        /* Выделяем жирным остатки */
+        .badge-negative, #tableBody td:nth-child(3) {
+            font-weight: 700;
+        }
     </style>
 </head>
 <body>
@@ -109,22 +131,23 @@
     <div class="stats" id="tableStats">Загрузка данных...</div>
     <div id="loader" class="loader">Синхронизация с базой данных GitHub...</div>
     <div id="errorContainer"></div>
-
-    <table id="dataTable" style="display: none;">
-        <thead>
-            <tr>
-                <th>Код</th>
-                <th>Наименование, Ед. изм.</th>
-                <th>Остаток</th>
-                <th>Закуп (руб)</th>
-                <th>Розница (руб)</th>
-                <th>Коэфф.</th>
-            </tr>
-        </thead>
-        <tbody id="tableBody">
-            <!-- Строки генерируются динамически -->
-        </tbody>
-    </table>
+    <div class="table-responsive">
+        <table id="dataTable" style="display: none;">
+            <thead>
+                <tr>
+                    <th>Код</th>
+                    <th>Наименование, Ед. изм.</th>
+                    <th>Остаток</th>
+                    <th>Закуп (руб)</th>
+                    <th>Розница (руб)</th>
+                    <th>Коэфф.</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Строки генерируются динамически -->
+            </tbody>
+        </table>
+    </div>    
 </div>
 
 <script>
@@ -179,7 +202,8 @@
 
             row.innerHTML = `
                 <td>${item["Код"] || ''}</td>
-                <td><strong>${item["Номенклатура, Ед. изм."] || ''}</strong></td>
+                // Изменено в строке вывода названия номенклатуры
+                <td><div style="min-width: 140px;"><strong>${item["Номенклатура, Ед. изм."] || ''}</strong></div></td>
                 ${stockTd}
                 <td>${item["Закуп"] || '0.00'}</td>
                 <td>${item["Розница"] || '0.00'}</td>
