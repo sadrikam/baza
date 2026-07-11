@@ -129,13 +129,13 @@
 
 <script>
     // URL raw-файла из репозитория для обхода ограничений CORS GitHub Pages
-    const jsonUrl = 'https://github.com/sadrikam/baza/blob/main/baza.json';
+    //const jsonUrl = 'https://github.com/sadrikam/baza/blob/main/baza.json';
     
     let productsData = [];
 
     async function loadData() {
         try {
-            const response = await fetch(jsonUrl);
+            const response = await fetch('baza.json');
             if (!response.ok) throw new Error(`Ошибка сети: ${response.status}`);
             
             productsData = await response.json();
