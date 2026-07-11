@@ -42,33 +42,49 @@
         }
         table {
             width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-            font-size: 11px;
+            border-collapse: separate; /* Ключевое изменение для стабильности sticky */
+            border-spacing: 0;         /* Чтобы не было двойных отступов между ячейками */
+            margin: 0;
+            font-size: 11px; /* Чуть крупнее для читаемости */
         }
+
         .table-responsive {
             width: 100%;
-            overflow-x: auto;
+            max-height: 80vh; /* Ограничиваем высоту таблицы (80% экрана). Можно менять на px, например 600px */
+            overflow-y: auto;  /* Вертикальная прокрутка ВНУТРИ этого блока */
+            overflow-x: auto;  /* Горизонтальная прокрутка */
             -webkit-overflow-scrolling: touch;
             margin-top: 10px;
+            border: 1px solid #e2e8f0; /* Рамка вокруг таблицы для красоты */
+            border-radius: 4px;
         }
+
         th, td {
-            padding: 6px 4px; /* Было 12px */
-            font-size: 13px; /* Было 14px */
-            word-break: break-word; /* Новая строка */
+            padding: 8px 12px; /* Немного больше воздуха */
+            word-break: break-word;
+            border-bottom: 1px solid #e2e8f0;
+            border-right: 1px solid #f1f5f9; /* Тонкая линия между колонками */
         }
+        /* Убираем нижнюю границу у последней строки для эстетики */
+        tr:last-child td {
+            border-bottom: none;
+        }
+        
         th {
             background-color: #34495e;
             color: #ffffff;
             text-align: left;
-            padding: 12px;
             font-weight: 600;
+            padding: 12px 12px;
+            
+            /* ПРАВИЛЬНАЯ НАСТРОЙКА STICKY */
             position: sticky;
-            top: -1px; /* Было 0 */
-            z-index: 10; /* Новая строка */
+            top: 0;          /* Прилипает к верху родителя */
+            z-index: 50;     /* Высокий индекс, чтобы быть поверх скроллящихся строк */
+            
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Тень для эффекта "плавающей" шапки */
         }
         td {
-            /* padding: 12px; */
             border-bottom: 1px solid #e2e8f0;
         }
         tr:hover {
@@ -99,6 +115,11 @@
             border-radius: 6px;
             margin: 20px 0;
         }
+        /* Исправление для Firefox: иногда sticky ломается, если у родителя position не static */
+        .table-responsive {
+            position: relative;
+        }
+        
         @media (max-width: 480px) {
             /* Скрываем колонку Коэффициент */
             table th:nth-child(6),
@@ -238,12 +259,13 @@
         }
 
         document.getElementById('tableStats').textContent = `Показано позиций: ${data.length} из ${productsData.length}`;
+        updateTableScroll(); 
     }
 
 function filterData() {
-  const nameQuery = document.getElementById('nameSearch').value.toLowerCase().trim();
-  const codeQuery = document.getElementById('codeSearch').value.toLowerCase().trim();
-  const showOnlyNegative = document.getElementById('negativeFilter').checked;
+    const nameQuery = document.getElementById('nameSearch').value.toLowerCase().trim();
+    const codeQuery = document.getElementById('codeSearch').value.toLowerCase().trim();
+    const showOnlyNegative = document.getElementById('negativeFilter').checked;
 
   const filtered = productsData.filter(item => {
     const name = (item["Номенклатура, Ед. изм."] || '').toLowerCase();
@@ -268,8 +290,26 @@ function filterData() {
     document.getElementById('codeSearch').addEventListener('input', filterData);
     document.getElementById('negativeFilter').addEventListener('change', filterData);
 
-    // Запуск инициализации при загрузке страницы
-    window.addEventListener('DOMContentLoaded', loadData);
+    // Также вызываем при загрузке, чтобы проверить состояние сразу
+    window.addEventListener('DOMContentLoaded', () => {
+        loadData();
+        // Небольшая задержка, чтобы DOM успел отрисоваться перед проверкой скролла
+        setTimeout(updateTableScroll, 100); 
+    });
+    
+function updateTableScroll() {
+    const tableContainer = document.querySelector('.table-responsive');
+    const table = document.getElementById('dataTable');
+    
+    if (table && tableContainer) {
+        // Если высота таблицы меньше высоты контейнера, убираем скролл
+        if (table.offsetHeight < tableContainer.offsetHeight) {
+            tableContainer.style.overflowY = 'hidden';
+        } else {
+            tableContainer.style.overflowY = 'auto';
+        }
+    }
+}
 </script>
 
 </body>
