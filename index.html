@@ -250,7 +250,7 @@
 
             // Новая строка: условие проверки отрицательного остатка
             // Если чекбокс нажат, то stockValue должно быть меньше 0. Если не нажат — условие всегда true.
-            const matchesNegative = !showOnlyNegative || (!isNaN(stockValue) && stockValue < 0);
+            // const matchesNegative = !showOnlyNegative || (!isNaN(stockValue) && stockValue < 0);
     
             // Обновленная строка возврата результатов фильтра
             return matchesName && matchesCode && matchesNegative;
