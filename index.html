@@ -107,7 +107,7 @@
             }
             /* Ужимаем Код, Закуп и Розницу до минимума */
             table th:nth-child(1), table td:nth-child(1),
-            table th:nth-child(4), table td:td:nth-child(4),
+            table th:nth-child(4), table td:nth-child(4),
             table th:nth-child(5), table td:nth-child(5) {
                 white-space: nowrap;
                 width: 1%;
@@ -175,9 +175,6 @@
 </div>
 
 <script>
-    // URL raw-файла из репозитория для обхода ограничений CORS GitHub Pages
-    //const jsonUrl = 'https://github.com/sadrikam/baza/blob/main/baza.json';
-    
     let productsData = [];
 
     async function loadData() {
